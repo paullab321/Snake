@@ -1,8 +1,13 @@
-#from src.gui import GUI
-#from src.snake import Snake
+from PySide6.QtWidgets import QApplication, QWidget
+
+import sys
 
 def main():
-    print("Hello World")
+    app = QApplication(sys.argv)
 
+    window = QWidget()
+    window.show()
+
+    app.exec()
 
 main()
