@@ -1,4 +1,4 @@
-#ToDo
+# ToDo
 
 - [ ] Create a simple GUI using Qt for python.
 - [ ] Start adding a Class named Snake.py where the logic resides
