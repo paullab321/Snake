@@ -1,15 +1,16 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
-    QHBoxLayout
+    QHBoxLayout, QMessageBox
 from PySide6.QtGui import QScreen, QFont, QIcon
 
-from src import game_controller
-from src.game_controller import GameController
-
-# Constants for width and height
+# Constants
 WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = 800
 BACKGROUND_COLOR = "#8F9691"
+ICON_PATH = "snake.png"
+FONT_SIZE = 20
+BUTTON_WIDTH = 200
+BUTTON_HEIGHT = 50
 BUTTON_STYLE = """
     QPushButton {
         background-color: #4CAF50; /* Green */
@@ -23,10 +24,38 @@ BUTTON_STYLE = """
     }
 """
 
-class SnakeGameGUI(QWidget):
+# Used in MainMenu and SubMenu to reduce redundancy
+class BaseUtilityClass(QWidget):
+    def center_window(self):
+        screen = QScreen.availableGeometry(QApplication.primaryScreen())
+        center_position = screen.center()
+        self.setGeometry(center_position.x() - WINDOW_WIDTH // 2, center_position.y() - WINDOW_HEIGHT // 2,
+                         WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    @staticmethod
+    def style_button(button):
+        button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+        button.setStyleSheet(BUTTON_STYLE)
+        return button
+
+    @staticmethod
+    def init_font():
+        font = QFont()
+        font.setPointSize(FONT_SIZE)
+        return font
+
+    @staticmethod
+    def set_window_icon(self, icon_path):
+        try:
+            self.setWindowIcon(QIcon(icon_path))
+        except Exception as e:
+            QMessageBox.warning(self, "Icon Load Error", f"Failed to load icon {e}")
+            print(f"Error loading icon: {e}")
+
+
+class MainMenu(BaseUtilityClass):
     def __init__(self):
         super().__init__()
-        self.game_controller: GameController = game_controller
 
         # Set up the main window
         self.setWindowTitle("Snake Game")
@@ -35,16 +64,9 @@ class SnakeGameGUI(QWidget):
 
         # Create widgets
         self.label_welcome = QLabel("Welcome to Snake Game")
-        self.button_start = QPushButton("Start Game", clicked=self.start_game)
-        self.button_options = QPushButton("Options", clicked=self.show_options)
-
-        # Set font size and style for the label
-        font = QFont()
-        font.setPointSize(20)
-        self.label_welcome.setFont(font)
-
-        self.button_start.setFixedSize(200, 50)
-        self.button_options.setFixedSize(200, 50)
+        self.label_welcome.setFont(self.init_font())
+        self.button_start = self.style_button(QPushButton("Start Game", clicked=self.show_sub_menu))
+        self.button_options = self.style_button(QPushButton("Options", clicked=self.show_options))
 
         # Set up the layout
         layout = QVBoxLayout(self)
@@ -71,52 +93,45 @@ class SnakeGameGUI(QWidget):
         self.center_window()
         # Set fixed size to make the window not resizable
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
-        icon_path = "snake.png"
-        self.setWindowIcon(QIcon(icon_path))
 
-        self.button_start.setStyleSheet(BUTTON_STYLE)
-        self.button_options.setStyleSheet(BUTTON_STYLE)
+        self.set_window_icon(self, (QIcon(ICON_PATH)))
 
-    def start_game(self):
+        self.play_screen = SubMenu(self)
+
+    def show_sub_menu(self):
         print("Starting game")
-        self.game_controller.show_play_screen()
+        self.hide()
+        self.play_screen.show()
 
     def show_options(self):
         print("Options button clicked!")
 
-    def center_window(self):
-        screen = QScreen.availableGeometry(QApplication.primaryScreen())
-        center_position = screen.center()
-        self.setGeometry(center_position.x() - WINDOW_WIDTH // 2, center_position.y() - WINDOW_HEIGHT // 2, WINDOW_WIDTH, WINDOW_HEIGHT)
 
-class PlayScreen(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class SubMenu(BaseUtilityClass):
+    def __init__(self, main_menu):
+        super().__init__()
 
-        self.game_controller = game_controller
+        self.main_menu = main_menu
 
         self.setWindowTitle("Play Screen")
         self.setStyleSheet(f"background-color: {BACKGROUND_COLOR};")
 
         # Create widgets
         self.label_score = QLabel("Score: 0")
-        self.button_return_to_menu = QPushButton("Return to Menu", clicked=self.return_to_menu)
-        self.button_retry = QPushButton("Retry", clicked=self.retry)
+        self.label_score.setFont(self.init_font())
+
+        self.button_return_to_menu = self.style_button(QPushButton("Return to Menu", clicked=self.show_main_menu))
+        self.button_retry = self.style_button(QPushButton("Retry", clicked=self.retry))
         self.canvas_view = QGraphicsView()
         self.canvas_scene = QGraphicsScene()
         self.canvas_view.setScene(self.canvas_scene)
-
-        # Set font size and style for the label
-        font = QFont()
-        font.setPointSize(16)
-        self.label_score.setFont(font)
 
         # Set up the layout
         layout = QVBoxLayout(self)
 
         # Add score label to layout
         score_layout = QHBoxLayout()
-        score_layout.addWidget(self.label_score, alignment=Qt.AlignLeft)
+        score_layout.addWidget(self.label_score, alignment=Qt.AlignCenter)
         layout.addLayout(score_layout)
 
         # Add return to menu and retry buttons to layout
@@ -128,9 +143,17 @@ class PlayScreen(QWidget):
         # Add canvas to layout
         layout.addWidget(self.canvas_view)
 
-    def return_to_menu(self):
+        # Center the window on the screen
+        self.center_window()
+        # Set fixed size to make the window not resizable
+        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+        self.set_window_icon(self, (QIcon(ICON_PATH)))
+
+    def show_main_menu(self):
         # Add functionality to return to the main menu
-        pass
+        self.hide()
+        self.main_menu.show()
 
     def retry(self):
         # Add functionality to retry the game
