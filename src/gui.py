@@ -2,55 +2,42 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QGraphicsView, QGraphicsScene, \
     QHBoxLayout, QMessageBox
 from PySide6.QtGui import QScreen, QFont, QIcon
+import os
+from constants import (WINDOW_HEIGHT, WINDOW_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_STYLE, BACKGROUND_COLOR,
+                       FONT_SIZE, ICON_PATH)
 
-# Constants
-WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 800
-BACKGROUND_COLOR = "#8F9691"
-ICON_PATH = "snake.png"
-FONT_SIZE = 20
-BUTTON_WIDTH = 200
-BUTTON_HEIGHT = 50
-BUTTON_STYLE = """
-    QPushButton {
-        background-color: #4CAF50; /* Green */
-        color: white;
-        border: 1px solid #4CAF50;
-        border-radius: 5px;
-        padding: 5px;
-    }
-    QPushButton:hover {
-        background-color: #45a049; /* Darker green */
-    }
-"""
 
 # Used in MainMenu and SubMenu to reduce redundancy
 class BaseUtilityClass(QWidget):
+    # used to center a Widget, in this case MainMenu and SubMenu
     def center_window(self):
         screen = QScreen.availableGeometry(QApplication.primaryScreen())
         center_position = screen.center()
         self.setGeometry(center_position.x() - WINDOW_WIDTH // 2, center_position.y() - WINDOW_HEIGHT // 2,
                          WINDOW_WIDTH, WINDOW_HEIGHT)
 
+    # styling buttons teh same using the global constants
     @staticmethod
     def style_button(button):
         button.setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT)
         button.setStyleSheet(BUTTON_STYLE)
         return button
 
+    # fonts will now all be the same size, when added in a Widget
     @staticmethod
     def init_font():
         font = QFont()
         font.setPointSize(FONT_SIZE)
         return font
 
+    # sets the icon for the widget, and handles exception for missing icon_path
     @staticmethod
-    def set_window_icon(self, icon_path):
-        try:
-            self.setWindowIcon(QIcon(icon_path))
-        except Exception as e:
-            QMessageBox.warning(self, "Icon Load Error", f"Failed to load icon {e}")
-            print(f"Error loading icon: {e}")
+    def set_window_icon(widget, icon_path):
+        if os.path.isfile(icon_path):
+            widget.setWindowIcon(QIcon(icon_path))
+        else:
+            QMessageBox.warning(widget, "Icon Load Error", f"Icon file not found: {icon_path}")
+            print(f"Icon file not found: {icon_path}")
 
 
 class MainMenu(BaseUtilityClass):
@@ -94,7 +81,7 @@ class MainMenu(BaseUtilityClass):
         # Set fixed size to make the window not resizable
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        self.set_window_icon(self, (QIcon(ICON_PATH)))
+        self.set_window_icon(self, ICON_PATH)
 
         self.play_screen = SubMenu(self)
 
@@ -105,6 +92,7 @@ class MainMenu(BaseUtilityClass):
 
     def show_options(self):
         print("Options button clicked!")
+        pass
 
 
 class SubMenu(BaseUtilityClass):
@@ -148,7 +136,7 @@ class SubMenu(BaseUtilityClass):
         # Set fixed size to make the window not resizable
         self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        self.set_window_icon(self, (QIcon(ICON_PATH)))
+        self.set_window_icon(self, ICON_PATH)
 
     def show_main_menu(self):
         # Add functionality to return to the main menu
@@ -158,6 +146,3 @@ class SubMenu(BaseUtilityClass):
     def retry(self):
         # Add functionality to retry the game
         pass
-
-
-

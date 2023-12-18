@@ -1,19 +1,7 @@
 import random
-
-GAME_WIDTH = 1100
-GAME_HEIGHT = 900
-SPEED = 100
-MAX_SPEED = 50
-SPACE_SIZE = 35
-BODY_PARTS = 3
-SNAKE_BODY_COLOR = "#66CC00"
-SNAKE_HEAD_COLOR = "#99FF33"
-FOOD_COLOR = "#FF3333"
-BACKGROUND_COLOR = "#A0A0A0"
-
+from constants import WINDOW_HEIGHT, WINDOW_WIDTH, SPEED, MAX_SPEED, SPACE_SIZE, BODY_PARTS, SNAKE_BODY_COLOR, FOOD_COLOR
 
 class Snake:
-
     def __init__(self):
         self.body_size = BODY_PARTS
         self.coordinates = []
@@ -31,10 +19,9 @@ class Snake:
 
 
 class Food:
-
     def __init__(self):
-        x_spawn = random.randint(0, int((GAME_WIDTH / SPACE_SIZE)) - 1) * SPACE_SIZE
-        y_spawn = random.randint(0, int((GAME_HEIGHT / SPACE_SIZE)) - 1) * SPACE_SIZE
+        x_spawn = random.randint(0, int((WINDOW_WIDTH / SPACE_SIZE)) - 1) * SPACE_SIZE
+        y_spawn = random.randint(0, int((WINDOW_HEIGHT / SPACE_SIZE)) - 1) * SPACE_SIZE
 
         self.coordinates = [x_spawn, y_spawn]
 
@@ -59,7 +46,7 @@ def next_turn(snake, food):
 
     snake.coordinates.insert(0, (x, y))
     # noinspection PyArgumentList
-    square = (canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_HEAD_COLOR, tag="snake"))
+    square = (canvas.create_rectangle(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_BODY_COLOR, tag="snake"))
 
     snake.squares.insert(0, square)
 
@@ -113,10 +100,10 @@ def change_direction(new_direction):
 def check_collision(snake):
     x, y = snake.coordinates[0]
 
-    if x < 0 or x >= GAME_WIDTH:
+    if x < 0 or x >= WINDOW_WIDTH:
         return True
 
-    elif y < 0 or y >= GAME_HEIGHT:
+    elif y < 0 or y >= WINDOW_HEIGHT:
         return True
 
     for body_part in snake.coordinates[1:]:
@@ -132,9 +119,9 @@ def game_over():
     canvas.create_text(canvas.winfo_width() / 2, canvas.winfo_height() / 2,
                        font=('consolas', 70), text="Game Over", fill="red", tag="gameover")
 
-    #button = Button(window, text="Retry", command= run_game)
-    #button.pack()
-    #window.update()
+    # button = Button(window, text="Retry", command= run_game)
+    # button.pack()
+    # window.update()
 
 
 window = Tk()
@@ -151,7 +138,7 @@ label_score.pack()
 label_info = Label(window, text="Welcome to Snake Game", font=('consolas', 20))
 label_info.pack()
 
-canvas = Canvas(window, bg=BACKGROUND_COLOR, height=GAME_HEIGHT, width=GAME_WIDTH)
+canvas = Canvas(window, bg=BACKGROUND_COLOR, height=WINDOW_HEIGHT, width=WINDOW_WIDTH)
 canvas.pack()
 
 window.update()
@@ -180,7 +167,7 @@ def run_game():
 
 
 def main():
-
     run_game()
+
 
 main()
